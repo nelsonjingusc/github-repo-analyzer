@@ -179,17 +179,31 @@ class QueryParser:
     
     def _extract_language(self, query: str) -> Optional[str]:
         """Extract programming language from query"""
-        # Check for exact matches first
+        # Check for exact matches first - need word boundaries to avoid false matches
+        import re
         for lang in self.programming_languages:
-            if f" {lang} " in f" {query} " or query.startswith(lang) or query.endswith(lang):
-                # Handle special cases
-                if lang == 'js':
-                    return 'javascript'
-                elif lang == 'ts':
-                    return 'typescript'
-                elif lang == 'cpp':
-                    return 'c++'
-                return lang
+            # Use word boundary matching to avoid matching 'c' in 'recent'
+            if len(lang) == 1:  # Single letter languages like 'c' need special handling
+                pattern = r'\b' + re.escape(lang.upper()) + r'\b|\b' + re.escape(lang.lower()) + r'\b'
+                if re.search(pattern, query):
+                    # Additional check for context - avoid common words
+                    if lang == 'c' and re.search(r'\b[Cc]\+\+\b', query):
+                        return 'c++'
+                    elif lang == 'c' and not re.search(r'\b[Cc]( language| programming)\b', query):
+                        continue  # Skip standalone 'c' unless clearly referring to language
+                    return lang
+            else:
+                # For multi-character languages, use word boundaries
+                pattern = r'\b' + re.escape(lang) + r'\b'
+                if re.search(pattern, query, re.IGNORECASE):
+                    # Handle special cases
+                    if lang == 'js':
+                        return 'javascript'
+                    elif lang == 'ts':
+                        return 'typescript'
+                    elif lang == 'cpp':
+                        return 'c++'
+                    return lang
         
         # Check for language-specific keywords
         if 'node' in query or 'npm' in query:

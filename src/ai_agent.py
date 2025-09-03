@@ -357,15 +357,31 @@ class GitHubAnalysisAgent:
                 owner, name = repo_name.split('/', 1)
                 repos_to_compare.append((owner, name))
             else:
-                # Search for the repository
-                search_results = self.github_tool.search_repositories(
-                    query=repo_name,
-                    per_page=1
-                )
-                if search_results:
-                    full_name = search_results[0]['full_name']
-                    owner, name = full_name.split('/', 1)
-                    repos_to_compare.append((owner, name))
+                # Check if it's a language comparison (like "Java vs Python")
+                programming_languages = {'java', 'python', 'javascript', 'go', 'rust', 'c++', 'c#', 'php', 'ruby', 'swift', 'kotlin'}
+                
+                if repo_name.lower() in programming_languages:
+                    # For language comparisons, find representative repositories
+                    if repo_name.lower() == 'java':
+                        repos_to_compare.append(('spring-projects', 'spring-boot'))
+                    elif repo_name.lower() == 'python':
+                        repos_to_compare.append(('django', 'django'))
+                    elif repo_name.lower() == 'javascript':
+                        repos_to_compare.append(('facebook', 'react'))
+                    elif repo_name.lower() == 'go':
+                        repos_to_compare.append(('golang', 'go'))
+                    elif repo_name.lower() == 'rust':
+                        repos_to_compare.append(('rust-lang', 'rust'))
+                else:
+                    # Search for the repository by name
+                    search_results = self.github_tool.search_repositories(
+                        query=repo_name,
+                        per_page=1
+                    )
+                    if search_results:
+                        full_name = search_results[0]['full_name']
+                        owner, name = full_name.split('/', 1)
+                        repos_to_compare.append((owner, name))
         
         if repos_to_compare:
             return self.github_tool.compare_repositories(repos_to_compare)
