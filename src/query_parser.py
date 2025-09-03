@@ -48,35 +48,11 @@ class QueryParser:
             'issue', 'issues', 'contributor', 'contributors', 'watcher', 'watchers'
         }
         
-        # Pattern definitions for different query types
-        self.patterns = {
-            'ranking': [
-                r'top\s+(\d+)\s+(?:most\s+)?(starred|popular|used|forked)',
-                r'(?:show me|list|find)\s+(?:the\s+)?top\s+(\d+)',
-                r'most\s+(starred|popular|forked|active)\s+(\w+)',
-                r'best\s+(\d+)?\s*(\w+)',
-                r'(\d+)\s+most\s+(starred|popular)'
-            ],
-            'comparison': [
-                r'compare\s+([\w\-\.]+)\s+(?:vs|and|with|to)\s+([\w\-\.]+)',
-                r'([\w\-\.]+)\s+(?:vs|versus|compared to)\s+([\w\-\.]+)',
-                r'how\s+(?:does\s+)?([\w\-\.]+)\s+compare\s+(?:to\s+)?([\w\-\.]+)',
-                r'difference\s+between\s+([\w\-\.]+)\s+and\s+([\w\-\.]+)',
-                r'which\s+is\s+better\s+([\w\-\.]+)\s+or\s+([\w\-\.]+)'
-            ],
-            'trending': [
-                r'trending\s+(\w+)?\s*(?:projects|repositories|repos)',
-                r'(?:show me|find)\s+trending',
-                r'popular\s+(?:recently|this\s+(?:year|month|week))',
-                r'hot\s+(?:projects|repositories)',
-                r'rising\s+(?:projects|stars)'
-            ],
-            'search': [
-                r'(?:find|search|show)\s+(?:me\s+)?(?:some\s+)?(\w+)',
-                r'(?:projects|repositories|repos)\s+(?:about|for|with)',
-                r'(?:any|some)\s+(?:good\s+)?(\w+)'
-            ]
-        }
+        # Flexible keyword-based patterns instead of rigid regex
+        self.ranking_keywords = {'top', 'best', 'most', 'popular', 'starred', 'forked'}
+        self.comparison_keywords = {'vs', 'versus', 'compare', 'comparison', 'difference', 'better'}
+        self.trending_keywords = {'trending', 'hot', 'rising', 'popular', 'recent'}
+        self.search_keywords = {'find', 'show', 'search', 'get', 'about', 'projects', 'repositories'}
 
     def parse_query(self, query: str) -> Dict[str, Any]:
         """
@@ -104,60 +80,60 @@ class QueryParser:
             'confidence': 0.0
         }
         
-        # Detect intent and extract parameters
-        intent_detected = False
+        # Flexible intent detection based on keywords
+        query_words = set(query_lower.split())
         
-        # Check for ranking queries
-        for pattern in self.patterns['ranking']:
-            match = re.search(pattern, query_lower, re.IGNORECASE)
-            if match:
-                result['intent'] = QueryIntent.RANKING
-                result['confidence'] = 0.8
-                intent_detected = True
-                
-                # Extract number if present
-                numbers = re.findall(r'\d+', match.group(0))
-                if numbers:
-                    result['limit'] = min(int(numbers[0]), 50)  # Cap at 50
-                
-                # Extract sort criteria
-                sort_keywords = ['starred', 'popular', 'forked', 'active']
-                for keyword in sort_keywords:
-                    if keyword in match.group(0):
-                        if keyword in ['starred', 'popular']:
-                            result['sort_by'] = 'stars'
-                        elif keyword == 'forked':
-                            result['sort_by'] = 'forks'
-                        elif keyword == 'active':
-                            result['sort_by'] = 'updated'
+        # Calculate intent scores
+        ranking_score = len(query_words & self.ranking_keywords)
+        comparison_score = len(query_words & self.comparison_keywords)  
+        trending_score = len(query_words & self.trending_keywords)
+        search_score = len(query_words & self.search_keywords)
+        
+        # Also check for numbers (indicates ranking)
+        numbers = re.findall(r'\d+', query_lower)
+        if numbers:
+            ranking_score += 1
+            result['limit'] = min(int(numbers[0]), 50)
+        
+        # Check for comparison indicators (vs, versus, compare X and Y)
+        if re.search(r'\b(vs|versus)\b', query_lower) or re.search(r'compare.*\b(and|with)\b', query_lower):
+            comparison_score += 2
+            
+        # Extract potential comparison items - more flexible patterns
+        comparison_patterns = [
+            r'(\w+)\s+(?:vs|versus)\s+(\w+)',           # X vs Y
+            r'(\w+)\s+(?:and|with)\s+(\w+)',           # X and Y, X with Y  
+            r'(\w+)\s+or\s+(\w+)',                     # X or Y
+            r'compare\s+(\w+)\s+(?:and|with|to)\s+(\w+)', # compare X and Y
+            r'between\s+(\w+)\s+and\s+(\w+)'          # between X and Y
+        ]
+        
+        for pattern in comparison_patterns:
+            comparison_match = re.search(pattern, query_lower)
+            if comparison_match:
+                result['repositories'] = [comparison_match.group(1), comparison_match.group(2)]
+                comparison_score += 1
                 break
         
-        # Check for comparison queries
-        if not intent_detected:
-            for pattern in self.patterns['comparison']:
-                match = re.search(pattern, query_lower, re.IGNORECASE)
-                if match:
-                    result['intent'] = QueryIntent.COMPARISON
-                    result['confidence'] = 0.9
-                    result['repositories'] = [match.group(1), match.group(2)]
-                    intent_detected = True
-                    break
+        # Determine intent based on highest score
+        max_score = max(ranking_score, comparison_score, trending_score, search_score)
         
-        # Check for trending queries
-        if not intent_detected:
-            for pattern in self.patterns['trending']:
-                match = re.search(pattern, query_lower, re.IGNORECASE)
-                if match:
-                    result['intent'] = QueryIntent.TRENDING
-                    result['confidence'] = 0.7
-                    result['filters']['days'] = 30  # Default to last 30 days
-                    intent_detected = True
-                    break
-        
-        # Default to search if no specific intent detected
-        if not intent_detected:
+        if max_score == 0:
             result['intent'] = QueryIntent.SEARCH
-            result['confidence'] = 0.5
+            result['confidence'] = 0.3
+        elif comparison_score == max_score:
+            result['intent'] = QueryIntent.COMPARISON
+            result['confidence'] = min(0.9, 0.6 + comparison_score * 0.1)
+        elif ranking_score == max_score:
+            result['intent'] = QueryIntent.RANKING  
+            result['confidence'] = min(0.9, 0.6 + ranking_score * 0.1)
+        elif trending_score == max_score:
+            result['intent'] = QueryIntent.TRENDING
+            result['confidence'] = min(0.8, 0.5 + trending_score * 0.1)
+            result['filters']['days'] = 30
+        else:
+            result['intent'] = QueryIntent.SEARCH
+            result['confidence'] = min(0.7, 0.4 + search_score * 0.1)
         
         # Extract programming language
         detected_language = self._extract_language(query_lower)
