@@ -39,10 +39,10 @@ def main():
         description="GitHub Repository Analysis Agent",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
-🚀 GitHub Repository Analysis Agent
+GitHub Repository Analysis Agent
 
-This AI agent helps you analyze GitHub repositories, find trending projects,
-compare repositories, and understand code trends through natural language queries.
+Helps analyze GitHub repositories, find trending projects, and compare 
+repositories through natural language queries.
 
 Examples:
   python main.py
@@ -51,9 +51,7 @@ Examples:
   python main.py --query "compare React vs Vue" --json
 
 Environment Variables:
-  GITHUB_TOKEN    - GitHub personal access token (recommended for higher rate limits)
-  
-For more information, visit: https://github.com/your-repo/github-repo-analyzer
+  GITHUB_TOKEN    - GitHub personal access token for higher rate limits
         """
     )
     

@@ -89,23 +89,21 @@ class CLIInterface:
         """Display welcome message"""
         if RICH_AVAILABLE:
             welcome_text = """
-# 🚀 GitHub Repository Analysis Agent
+# GitHub Repository Analysis Agent
 
-Welcome to your intelligent GitHub repository analysis assistant!
+Welcome to the GitHub repository analysis assistant!
 
-## What I can help you with:
+## What I can help with:
 
 • **Repository Rankings**: "Show me the top 5 Python web frameworks"
 • **Project Comparisons**: "Compare React vs Vue.js activity" 
 • **Trending Analysis**: "What are trending JavaScript projects this week?"
 • **Smart Search**: "Find machine learning libraries for beginners"
 
-## Quick Tips:
+## Tips:
 - Be specific about programming languages for better results
 - Ask follow-up questions to dive deeper into any topic
 - Type 'help' for more commands or 'quit' to exit
-
-Let's explore the world of open source together! 🔍
 """
             
             self.console.print(Panel(

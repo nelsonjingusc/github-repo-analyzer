@@ -1,4 +1,4 @@
-# 🚀 GitHub Repository Analysis Agent
+# GitHub Repository Analysis Agent
 
 An intelligent AI agent that analyzes GitHub repository data to answer questions about code trends, project activity, and repository comparisons using natural language queries.
 
@@ -6,7 +6,7 @@ An intelligent AI agent that analyzes GitHub repository data to answer questions
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Code Style: Black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-## 🎯 Features
+## Features
 
 - **Natural Language Queries**: Ask questions in plain English about GitHub repositories
 - **Repository Rankings**: Find top repositories by stars, forks, or activity
@@ -16,61 +16,61 @@ An intelligent AI agent that analyzes GitHub repository data to answer questions
 - **Interactive CLI**: Beautiful command-line interface with rich formatting
 - **Free & Open Source**: Uses only free APIs and local processing
 
-## 🌟 Sample Interactions
+## Sample Interactions
 
 ```bash
-🔍 Ask me about repositories: What are the top 5 most starred Python web frameworks?
+Ask me about repositories: What are the top 5 most starred Python web frameworks?
 
-🤖 Analysis Result (Intent: ranking)
+Analysis Result (Intent: ranking)
 ┌─────────────────────────────────────────────────────────────────┐
 │ Here are the top 5 most starred Python web frameworks:         │
 │                                                                 │
-│ 1. **django/django** ⭐ 75,234                               │
+│ 1. **django/django** 75,234 stars                               │
 │    A high-level Python web framework that encourages rapid...  │
 │                                                                 │
-│ 2. **pallets/flask** ⭐ 65,847                               │
+│ 2. **pallets/flask** 65,847 stars                               │
 │    A lightweight WSGI web application framework for Python...  │
 │                                                                 │
-│ 3. **tornadoweb/tornado** ⭐ 21,456                          │
+│ 3. **tornadoweb/tornado** 21,456 stars                          │
 │    Tornado is a Python web framework and asynchronous...       │
 │                                                                 │
-│ 4. **bottlepy/bottle** ⭐ 8,234                              │
+│ 4. **bottlepy/bottle** 8,234 stars                              │
 │    bottle.py is a fast and simple micro-framework for...       │
 │                                                                 │
-│ 5. **webpy/webpy** ⭐ 5,876                                  │
+│ 5. **webpy/webpy** 5,876 stars                                  │
 │    web.py is a web framework for Python that is as...          │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
 ```bash
-🔍 Ask me about repositories: Compare React vs Vue.js activity
+Ask me about repositories: Compare React vs Vue.js activity
 
-🤖 Analysis Result (Intent: comparison)
+Analysis Result (Intent: comparison)
 ┌─────────────────────────────────────────────────────────────────┐
 │ ## Repository Comparison                                        │
 │                                                                 │
 │ ### facebook/react                                              │
-│ - **Stars**: 218,234                                           │
-│ - **Forks**: 44,876                                            │
-│ - **Language**: JavaScript                                      │
-│ - **Recent Commits**: 156                                       │
-│ - **Contributors**: 1,234                                       │
-│ - **Last Updated**: 2024-01-15                                  │
+│ - Stars: 218,234                                                │
+│ - Forks: 44,876                                                 │
+│ - Language: JavaScript                                           │
+│ - Recent Commits: 156                                            │
+│ - Contributors: 1,234                                            │
+│ - Last Updated: 2024-01-15                                       │
 │                                                                 │
 │ ### vuejs/vue                                                   │
-│ - **Stars**: 206,487                                           │
-│ - **Forks**: 33,645                                            │
-│ - **Language**: JavaScript                                      │
-│ - **Recent Commits**: 89                                        │
-│ - **Contributors**: 876                                         │
-│ - **Last Updated**: 2024-01-14                                  │
+│ - Stars: 206,487                                                │
+│ - Forks: 33,645                                                 │
+│ - Language: JavaScript                                           │
+│ - Recent Commits: 89                                             │
+│ - Contributors: 876                                              │
+│ - Last Updated: 2024-01-14                                       │
 │                                                                 │
 │ **Analysis**: React has more stars and recent activity,         │
 │ while Vue shows strong community engagement.                    │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-## 🛠 Installation & Setup
+## Installation & Setup
 
 ### Prerequisites
 
@@ -116,7 +116,7 @@ pip install -e .
 repo-analyzer
 ```
 
-## 📋 Usage
+## Usage
 
 ### Interactive Mode
 ```bash
@@ -138,7 +138,7 @@ python main.py --query "trending JavaScript projects" --json
 python main.py --debug
 ```
 
-## 🔧 Configuration
+## Configuration
 
 ### Environment Variables
 
@@ -222,7 +222,7 @@ github-repo-analyzer/
 User Query → Query Parser → Intent Detection → GitHub API → Data Processing → Response Generation → CLI Display
 ```
 
-## 🧠 AI Capabilities
+## AI Capabilities
 
 ### Natural Language Understanding
 The agent can understand various query patterns:
@@ -241,110 +241,38 @@ The agent can understand various query patterns:
 - **Rate Limit Handling**: Automatic retry with exponential backoff
 - **Async Processing**: Concurrent API requests for faster responses
 
-## 🔒 Security & Privacy
+## Security & Privacy
 
 - **No Data Collection**: All processing happens locally
 - **Token Security**: GitHub tokens are handled securely and never logged
 - **Rate Limit Compliance**: Respects GitHub API rate limits
 - **Error Handling**: Comprehensive error handling prevents crashes
 
-## 🚀 Future Improvements Proposal
+## Future Improvements
 
-Based on real-world deployment considerations, here are key areas for enhancement:
+Key areas for enhancement:
 
-### 1. Scalability & Performance
-**Current Limitations:**
-- Single-threaded processing limits concurrent users
-- In-memory caching doesn't persist across restarts
-- GitHub API rate limits restrict large-scale usage
+### Scalability & Performance
+- Add database persistence for caching across restarts
+- Implement distributed architecture with Redis
+- Add horizontal scaling support
 
-**Proposed Solutions:**
-- **Distributed Architecture**: Implement microservices with Redis for caching and message queues
-- **Database Integration**: PostgreSQL for persistent storage of repository metadata and analysis results
-- **CDN & Edge Caching**: CloudFlare or AWS CloudFront for global response caching
-- **Horizontal Scaling**: Kubernetes deployment with auto-scaling based on query volume
+### Enhanced AI Capabilities  
+- Integrate with advanced NLP libraries (spaCy/NLTK)
+- Add conversation memory across sessions
+- Implement learning from user interactions
 
-### 2. Enhanced AI Capabilities
-**Current Limitations:**
-- Limited to template responses without local LLM
-- No learning from user interactions
-- Basic natural language understanding
+### Data Coverage
+- Add support for GitLab and Bitbucket APIs
+- Integrate package registry data (PyPI, NPM)
+- Include code quality metrics from analysis tools
 
-**Proposed Solutions:**
-- **Advanced NLP**: Integration with spaCy or NLTK for better query understanding
-- **Machine Learning Pipeline**: Train custom models on repository metadata for better recommendations
-- **Conversation Memory**: Implement persistent conversation context across sessions  
-- **Multi-modal Analysis**: Analyze repository README files, code quality metrics, and community health
+### User Interface
+- Build web dashboard with visualizations
+- Add REST API for third-party integrations
+- Create mobile app version
 
-### 3. Data Quality & Coverage
-**Current Limitations:**
-- Relies solely on GitHub API data
-- No real-time code quality analysis
-- Limited repository metadata
-
-**Proposed Solutions:**
-- **Multi-source Integration**: Combine data from GitLab, Bitbucket, and package registries (PyPI, NPM)
-- **Code Analysis Pipeline**: Integrate with tools like SonarQube for code quality metrics
-- **Community Metrics**: Analyze Discord, Reddit, and Stack Overflow discussions
-- **Security Scanning**: Integrate vulnerability databases and dependency analysis
-
-### 4. User Experience & Interface
-**Current Limitations:**
-- Command-line only interface
-- No user account management
-- Limited customization options
-
-**Proposed Solutions:**
-- **Web Dashboard**: React/Vue.js frontend with interactive visualizations
-- **API Gateway**: RESTful API for third-party integrations
-- **Mobile App**: React Native app for mobile repository analysis
-- **Slack/Discord Bots**: Integration with popular developer communication tools
-
-### 5. Enterprise Features
-**Current Limitations:**
-- No access controls or user management
-- Limited monitoring and analytics
-- No SLA guarantees
-
-**Proposed Solutions:**
-- **Authentication & Authorization**: OAuth2/SAML integration with role-based access
-- **Enterprise SSO**: Integration with Active Directory and other enterprise identity providers
-- **Monitoring & Observability**: Prometheus/Grafana for system monitoring and user analytics
-- **SLA Compliance**: 99.9% uptime guarantee with proper error handling and fallback mechanisms
-
-### 6. Production Deployment Strategy
-**Infrastructure Requirements:**
-```yaml
-# Kubernetes deployment example
-Production Environment:
-  - Load Balancer: AWS ALB / Google Cloud Load Balancer
-  - API Gateway: Kong / AWS API Gateway  
-  - Compute: 3+ nodes with auto-scaling (2-16 pods)
-  - Database: AWS RDS PostgreSQL with read replicas
-  - Cache: Redis Cluster for session and API caching
-  - Storage: AWS S3 for static assets and backups
-  - Monitoring: DataDog / New Relic for APM
-```
-
-**Cost Estimation (Monthly):**
-- Small deployment (1000 queries/day): ~$200-400
-- Medium deployment (10000 queries/day): ~$800-1500  
-- Large deployment (100000+ queries/day): ~$3000-8000
-
-### 7. Compliance & Governance
-**Data Governance:**
-- GDPR compliance for European users
-- SOC2 Type II certification for enterprise customers
-- Regular security audits and penetration testing
-- Data retention policies and user right to deletion
-
-**Technical Governance:**
-- Automated testing pipeline with >90% code coverage
-- Infrastructure as Code (Terraform) for reproducible deployments
-- Disaster recovery plan with RTO < 4 hours, RPO < 1 hour
-- Regular dependency updates and security patches
-
-## 🤝 Contributing
+## Contributing
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
@@ -380,23 +308,10 @@ flake8 src/
 mypy src/
 ```
 
-## 📝 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🙏 Acknowledgments
-
-- GitHub API for providing comprehensive repository data
-- Rich library for beautiful CLI formatting
-- Ollama project for local LLM capabilities
-- The open source community for inspiration and feedback
-
-## 📞 Support
-
-- **Issues**: [GitHub Issues](https://github.com/your-username/github-repo-analyzer/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/your-username/github-repo-analyzer/discussions)
-- **Email**: contact@github-repo-analyzer.com
-
 ---
 
-**Built by Nelson Jing - A passionate developer exploring AI and open source**
+Built by Nelson Jing
