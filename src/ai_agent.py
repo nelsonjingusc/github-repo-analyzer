@@ -289,7 +289,7 @@ class GitHubAnalysisAgent:
                 "confidence": parsed_query['confidence'],
                 "metadata": {
                     "language": parsed_query['language'],
-                    "repositories_analyzed": len(analysis_result) if isinstance(analysis_result, list) else len(analysis_result) if isinstance(analysis_result, dict) else 0,
+                    "repositories_found": len(analysis_result) if isinstance(analysis_result, list) else len(analysis_result) if isinstance(analysis_result, dict) else 0,
                     "processing_time": "< 1s"
                 }
             }
@@ -402,14 +402,58 @@ class GitHubAnalysisAgent:
     
     async def _handle_search_query(self, parsed_query: Dict) -> List[Dict]:
         """Handle general search queries"""
-        # Extract search terms from the original query
-        search_terms = parsed_query['original_query'].lower()
+        # Extract search terms from the original query with better NLP
+        original_query = parsed_query['original_query'].lower()
         
-        # Remove common words
-        stop_words = {'find', 'show', 'me', 'some', 'projects', 'repositories', 'repos', 'about', 'for', 'with'}
-        search_words = [word for word in search_terms.split() if word not in stop_words and len(word) > 2]
+        # Expanded stop words for better filtering
+        stop_words = {
+            'find', 'show', 'me', 'some', 'any', 'projects', 'repositories', 'repos', 
+            'about', 'for', 'with', 'that', 'are', 'is', 'am', 'looking', 'search',
+            'get', 'help', 'i', 'im', 'want', 'need', 'decent', 'good', 
+            'nice', 'best', 'top', 'popular', 'which', 'what', 'how', 'where',
+            'arent', 'too', 'very', 'really', 'quite', 'pretty', 'heavyweight',
+            'light', 'heavy', 'small', 'large', 'simple', 'complex'
+        }
         
-        search_query = " ".join(search_words[:3])  # Limit to first 3 meaningful words
+        # Look for technical keywords that are more meaningful
+        tech_keywords = {
+            'framework', 'frameworks', 'library', 'libraries', 'tool', 'tools',
+            'microservice', 'microservices', 'api', 'rest', 'web', 'http',
+            'database', 'db', 'orm', 'sql', 'nosql', 'cache', 'redis',
+            'testing', 'auth', 'authentication', 'security', 'crypto',
+            'machine', 'learning', 'ml', 'ai', 'neural', 'deep',
+            'docker', 'kubernetes', 'cloud', 'aws', 'gcp', 'azure'
+        }
+        
+        # Extract words and find meaningful ones
+        words = original_query.replace("'", "").split()
+        meaningful_words = []
+        
+        # First pass: look for technical keywords
+        for word in words:
+            clean_word = word.strip('.,!?')
+            if clean_word in tech_keywords:
+                meaningful_words.append(clean_word)
+        
+        # Second pass: add other significant words not in stop words
+        for word in words:
+            clean_word = word.strip('.,!?')
+            if (clean_word not in stop_words and 
+                len(clean_word) > 2 and 
+                clean_word not in meaningful_words):
+                meaningful_words.append(clean_word)
+        
+        # If we found meaningful words, use them; otherwise fall back to original logic
+        if meaningful_words:
+            search_query = " ".join(meaningful_words[:3])
+        else:
+            # Fallback: just use project type or language if available
+            if parsed_query['project_type']:
+                search_query = parsed_query['project_type']
+            elif parsed_query['language']:
+                search_query = f"{parsed_query['language']} framework"
+            else:
+                search_query = "popular projects"
         
         return self.github_tool.search_repositories(
             query=search_query,

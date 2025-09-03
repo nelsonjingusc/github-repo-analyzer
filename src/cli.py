@@ -298,7 +298,7 @@ Welcome to the GitHub repository analysis assistant!
             if result.get('metadata'):
                 meta = result['metadata']
                 metadata_text = f"""
-**Confidence:** {result.get('confidence', 0):.2f} | **Language:** {meta.get('language', 'N/A')} | **Repos Analyzed:** {meta.get('repositories_analyzed', 0)}
+**Language:** {meta.get('language', 'N/A')} | **Repos Found:** {meta.get('repositories_found', 0)}
                 """.strip()
                 
                 self.console.print(Panel(
@@ -331,7 +331,7 @@ Welcome to the GitHub repository analysis assistant!
             print("ANALYSIS RESULT:")
             print("-"*20)
             print(result['response'])
-            print(f"\nIntent: {result['intent']} | Confidence: {result.get('confidence', 0):.2f}")
+            print(f"\nIntent: {result['intent']}")
         else:
             print("ERROR:")
             print("-"*20)

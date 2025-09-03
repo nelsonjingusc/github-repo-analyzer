@@ -101,7 +101,7 @@ class GitHubRepositoryTool:
                           language: Optional[str] = None,
                           sort: str = "stars",
                           order: str = "desc",
-                          per_page: int = 30) -> List[Dict[str, Any]]:
+                          per_page: int = 20) -> List[Dict[str, Any]]:
         """
         Search for repositories using GitHub's search API.
         
@@ -237,7 +237,7 @@ class GitHubRepositoryTool:
             language=language,
             sort="updated",
             order="desc",
-            per_page=30
+            per_page=20
         )
 
     def compare_repositories(self, repos: List[tuple]) -> Dict[str, Dict[str, Any]]:

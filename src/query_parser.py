@@ -73,7 +73,7 @@ class QueryParser:
             'language': None,
             'project_type': None,
             'sort_by': 'stars',
-            'limit': 10,
+            'limit': 20,
             'repositories': [],
             'filters': {},
             'original_query': query,
@@ -133,7 +133,17 @@ class QueryParser:
             result['filters']['days'] = 30
         else:
             result['intent'] = QueryIntent.SEARCH
-            result['confidence'] = min(0.7, 0.4 + search_score * 0.1)
+            # For search queries, confidence should be based on presence of meaningful technical terms
+            tech_word_count = len([word for word in query_lower.split() 
+                                 if word.strip('.,!?') in {'framework', 'frameworks', 'library', 'libraries', 
+                                                          'tool', 'tools', 'microservice', 'microservices', 
+                                                          'api', 'web', 'database', 'testing', 'machine', 
+                                                          'learning', 'docker', 'kubernetes'}])
+            has_language = result['language'] is not None
+            base_confidence = 0.4 + search_score * 0.1 + tech_word_count * 0.1
+            if has_language:
+                base_confidence += 0.2
+            result['confidence'] = min(0.8, base_confidence)
         
         # Extract programming language
         detected_language = self._extract_language(query_lower)
