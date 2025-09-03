@@ -1,0 +1,37 @@
+# GitHub Repository Analysis Agent Dependencies
+# Production-ready Python packages for enterprise-level AI agent
+
+# Core HTTP and API libraries
+requests>=2.31.0           # HTTP library for GitHub API calls
+aiohttp>=3.9.0            # Async HTTP client for concurrent API requests
+
+# CLI and UI libraries  
+rich>=13.7.0              # Beautiful terminal UI and formatting
+click>=8.1.0              # Command line interface creation (optional alternative)
+
+# Data processing and utilities
+python-dateutil>=2.8.2    # Enhanced date/time handling
+typing-extensions>=4.8.0  # Advanced typing support for Python < 3.11
+
+# Development and testing dependencies (optional)
+pytest>=7.4.0            # Testing framework
+pytest-asyncio>=0.21.0   # Async testing support  
+pytest-cov>=4.1.0        # Code coverage reporting
+black>=23.9.0             # Code formatting
+flake8>=6.1.0             # Code linting
+mypy>=1.6.0               # Static type checking
+
+# Optional: Local LLM support
+# Uncomment these if you want to use local LLM capabilities
+# ollama-python>=0.1.7     # Python client for Ollama
+# transformers>=4.35.0     # Hugging Face transformers (for local models)
+# torch>=2.1.0             # PyTorch (for local model inference)
+
+# Optional: Enhanced natural language processing
+# Uncomment for advanced NLP features
+# spacy>=3.7.0             # Industrial-strength NLP
+# nltk>=3.8.1              # Natural language toolkit
+
+# System compatibility
+setuptools>=68.0.0        # Package installation and distribution
+wheel>=0.41.0             # Python wheel format support
