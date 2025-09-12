@@ -128,6 +128,15 @@ python main.py
 python main.py --query "top 10 Python machine learning libraries"
 ```
 
+### Enhanced AI Mode (with OpenAI)
+```bash
+# Basic mode: fast template responses
+python main.py --openai-key YOUR_KEY --query "top 5 Python web frameworks"
+
+# Complete mode: natural language responses
+python main.py --openai-key YOUR_KEY --complete --query "compare Django vs Flask performance"
+```
+
 ### JSON Output
 ```bash
 python main.py --query "trending JavaScript projects" --json
@@ -146,21 +155,29 @@ python main.py --debug
   - Get yours at: https://github.com/settings/tokens
   - Increases API rate limits from 60 to 5,000 requests per hour
 
+- `OPENAI_API_KEY`: OpenAI API key for advanced AI features (optional)
+  - Get yours at: https://platform.openai.com/account/api-keys
+  - Enables intelligent query parsing and natural language responses
+
 ### Command Line Options
 
 ```bash
-usage: main.py [-h] [--token TOKEN] [--query QUERY] [--json] [--debug] [--version]
+usage: main.py [-h] [--token TOKEN] [--openai-key OPENAI_KEY] [--query QUERY] 
+               [--json] [--debug] [--complete] [--version]
 
 GitHub Repository Analysis Agent
 
 optional arguments:
   -h, --help            show this help message and exit
   --token TOKEN, -t TOKEN
-                        GitHub personal access token
+                        GitHub personal access token (or set GITHUB_TOKEN env var)
+  --openai-key OPENAI_KEY, -o OPENAI_KEY
+                        OpenAI API key for advanced query parsing (or set OPENAI_API_KEY env var)
   --query QUERY, -q QUERY
                         Execute a single query and exit
   --json, -j            Output results in JSON format
   --debug, -d           Enable debug logging and verbose output
+  --complete, -c        Use OpenAI for natural language responses (requires --openai-key)
   --version, -v         show program's version number and exit
 ```
 
@@ -224,21 +241,40 @@ User Query → Query Parser → Intent Detection → GitHub API → Data Process
 
 ## AI Capabilities
 
+### Dual-Mode Architecture
+The system offers two response modes:
+
+**Default Mode (Fast)**:
+- Rule-based query parsing + OpenAI query understanding (when API key available)
+- Template-based structured responses  
+- ~1-3 seconds response time
+- Perfect for rapid exploration and MVP demonstrations
+
+**Complete Mode (`--complete` flag)**:
+- GPT-5/GPT-4o powered query parsing
+- Natural language response generation
+- ~10-15 seconds response time
+- Rich, conversational analysis with detailed insights
+
 ### Natural Language Understanding
 The agent can understand various query patterns:
 - **Ranking queries**: "top N", "best", "most popular"
 - **Comparison queries**: "compare X vs Y", "difference between"
-- **Trending queries**: "trending", "hot", "rising"
+- **Trending queries**: "trending", "hot", "rising"  
 - **Search queries**: "find", "show me", "projects about"
 
 ### Response Generation
-- **Local LLM Support**: Uses Ollama when available for intelligent responses
-- **Template Fallback**: Smart template-based responses when LLM unavailable
+- **OpenAI Integration**: GPT-5 with automatic fallback to GPT-4o
+- **Local LLM Support**: Uses Ollama when available for offline operation
+- **Template System**: Smart structured responses as reliable fallback
 - **Rich Formatting**: Beautiful CLI output with tables, panels, and markdown
 
-### Caching & Performance
-- **API Caching**: 5-minute cache for GitHub API responses
+### Network Resilience
+- **Smart Retry**: 3-attempt retry with progressive timeouts (10s → 20s → 30s)
 - **Rate Limit Handling**: Automatic retry with exponential backoff
+- **Graceful Degradation**: High-quality mock data when GitHub API unavailable
+- **International Support**: Works reliably in network-restricted environments
+- **API Caching**: 5-minute cache for GitHub API responses
 - **Async Processing**: Concurrent API requests for faster responses
 
 ## Security & Privacy
