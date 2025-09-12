@@ -62,6 +62,12 @@ Environment Variables:
     )
     
     parser.add_argument(
+        '--openai-key', '-o', 
+        help='OpenAI API key for advanced query parsing (or set OPENAI_API_KEY env var)',
+        default=os.getenv('OPENAI_API_KEY')
+    )
+    
+    parser.add_argument(
         '--query', '-q',
         help='Execute a single query and exit'
     )
@@ -76,6 +82,12 @@ Environment Variables:
         '--debug', '-d',
         action='store_true',
         help='Enable debug logging and verbose output'
+    )
+    
+    parser.add_argument(
+        '--complete', '-c',
+        action='store_true',
+        help='Use OpenAI for natural language responses (requires --openai-key)'
     )
     
     parser.add_argument(
@@ -103,12 +115,16 @@ Environment Variables:
     sys.argv = ['cli.py']  # Reset argv for cli module
     if args.token:
         sys.argv.extend(['--token', args.token])
+    if args.openai_key:
+        sys.argv.extend(['--openai-key', args.openai_key])
     if args.query:
         sys.argv.extend(['--query', args.query])
     if args.json:
         sys.argv.append('--json')
     if args.debug:
         sys.argv.append('--debug')
+    if args.complete:
+        sys.argv.append('--complete')
     
     try:
         cli_main()

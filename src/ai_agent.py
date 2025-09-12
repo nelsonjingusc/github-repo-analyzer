@@ -20,7 +20,7 @@ import aiohttp
 from dataclasses import dataclass
 
 from github_tool import GitHubRepositoryTool, GitHubAPIError
-from query_parser import QueryParser, QueryIntent
+from query_parser import QueryParser, OpenAIQueryParser, QueryIntent, OPENAI_AVAILABLE
 
 logger = logging.getLogger(__name__)
 
@@ -42,12 +42,17 @@ class ConversationContext:
 class LLMProvider:
     """
     Abstract base for LLM providers with fallback mechanisms.
-    Supports Ollama (local), OpenAI API (with free tier), and basic template responses.
+    Supports OpenAI API, Ollama (local), and basic template responses.
     """
     
-    def __init__(self):
+    def __init__(self, openai_client=None, use_complete_mode=False):
         self.ollama_available = False
         self.openai_available = False
+        self.openai_client = openai_client
+        self.use_complete_mode = use_complete_mode
+        if openai_client:
+            self.openai_available = True
+            logger.info("OpenAI client available for response generation")
         # Note: _check_availability will be called asynchronously when needed
     
     async def _check_availability(self):
@@ -64,10 +69,53 @@ class LLMProvider:
     async def generate_response(self, prompt: str, context: Dict[str, Any] = None) -> str:
         """
         Generate response using available LLM provider with intelligent fallbacks
+        Priority: --complete + OpenAI > Ollama > Template (default)
         """
-        if self.ollama_available:
+        # Only use OpenAI if both --complete flag and API key are available
+        if self.use_complete_mode and self.openai_available:
+            return await self._openai_generate(prompt, context)
+        elif self.ollama_available:
             return await self._ollama_generate(prompt, context)
         else:
+            return self._template_generate(prompt, context or {})
+    
+    async def _openai_generate(self, prompt: str, context: Dict[str, Any]) -> str:
+        """Generate response using OpenAI GPT"""
+        try:
+            # Try GPT-5 first, fallback to GPT-4o if not available
+            try:
+                model = "gpt-5"
+                response = self.openai_client.chat.completions.create(
+                    model=model,
+                    messages=[
+                        {"role": "system", "content": "You are a helpful GitHub repository analysis expert. Provide clear, informative responses about repositories, programming trends, and code analysis."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    temperature=0.7,
+                    max_completion_tokens=800  # GPT-5 uses max_completion_tokens
+                )
+                logger.info("Generated response using OpenAI GPT-5")
+            except Exception as model_error:
+                # Fallback to GPT-4o if GPT-5 is not available
+                logger.warning(f"GPT-5 not available: {model_error}. Falling back to GPT-4o")
+                model = "gpt-4o"
+                response = self.openai_client.chat.completions.create(
+                    model=model,
+                    messages=[
+                        {"role": "system", "content": "You are a helpful GitHub repository analysis expert. Provide clear, informative responses about repositories, programming trends, and code analysis."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    temperature=0.7,
+                    max_tokens=800  # GPT-4o still uses max_tokens
+                )
+                logger.info("Generated response using OpenAI GPT-4o")
+            
+            result = response.choices[0].message.content.strip()
+            return result
+            
+        except Exception as e:
+            logger.warning(f"OpenAI response generation failed: {e}")
+            # Fall back to template generation
             return self._template_generate(prompt, context or {})
     
     async def _ollama_generate(self, prompt: str, context: Dict[str, Any]) -> str:
@@ -133,10 +181,11 @@ class LLMProvider:
             name = repo.get('name', 'Unknown')
             full_name = repo.get('full_name', name)
             stars = repo.get('stargazers_count', 0)
-            description = repo.get('description', 'No description available')[:100]
+            description = (repo.get('description') or 'No description available')[:100]
             
             response += f"{i}. **{full_name}** ⭐ {stars:,}\n"
-            response += f"   {description}{'...' if len(repo.get('description', '')) > 100 else ''}\n\n"
+            full_description = repo.get('description') or ''
+            response += f"   {description}{'...' if len(full_description) > 100 else ''}\n\n"
         
         return response
     
@@ -222,16 +271,37 @@ class GitHubAnalysisAgent:
     and intelligent response generation to provide comprehensive repository analysis.
     """
     
-    def __init__(self, github_token: Optional[str] = None):
+    def __init__(self, github_token: Optional[str] = None, openai_api_key: Optional[str] = None, use_openai_for_responses: bool = False):
         """
         Initialize the GitHub Analysis Agent
         
         Args:
             github_token: Optional GitHub token for higher rate limits
+            openai_api_key: Optional OpenAI API key for advanced query parsing
+            use_openai_for_responses: Whether to use OpenAI for response generation (--complete mode)
         """
         self.github_tool = GitHubRepositoryTool(github_token)
-        self.query_parser = QueryParser()
-        self.llm_provider = LLMProvider()
+        
+        # Initialize OpenAI client for both parsing and response generation
+        openai_client = None
+        if openai_api_key and OPENAI_AVAILABLE:
+            try:
+                from openai import OpenAI
+                openai_client = OpenAI(api_key=openai_api_key)
+                self.query_parser = OpenAIQueryParser(openai_api_key)
+                logger.info("Using OpenAI for both query parsing and response generation")
+            except Exception as e:
+                logger.warning(f"Failed to initialize OpenAI client: {e}")
+                self.query_parser = QueryParser()
+                logger.info("Falling back to rule-based query parser")
+        else:
+            self.query_parser = QueryParser()
+            if openai_api_key and not OPENAI_AVAILABLE:
+                logger.warning("OpenAI API key provided but openai library not installed. Using rule-based parser.")
+            else:
+                logger.info("Using rule-based query parser")
+        
+        self.llm_provider = LLMProvider(openai_client, use_complete_mode=use_openai_for_responses)
         self.context = ConversationContext()
         
         logger.info("GitHub Analysis Agent initialized")
@@ -333,6 +403,36 @@ class GitHubAnalysisAgent:
         
         if parsed_query['language']:
             query_parts.append(parsed_query['language'])
+        
+        # Extract additional domain-specific keywords from the original query
+        original_query = parsed_query['original_query'].lower()
+        domain_keywords = []
+        
+        # Common domain keywords that should be included in search
+        important_terms = {
+            'trading', 'finance', 'financial', 'option', 'options', 'covered', 'calls',
+            'machine', 'learning', 'neural', 'network', 'deep', 'ai', 'artificial',
+            'web', 'http', 'rest', 'api', 'microservice', 'microservices',
+            'database', 'sql', 'nosql', 'orm', 'cache', 'redis',
+            'testing', 'test', 'unit', 'integration', 'mock',
+            'auth', 'authentication', 'security', 'crypto', 'encryption',
+            'docker', 'kubernetes', 'cloud', 'aws', 'gcp', 'azure'
+        }
+        
+        # Check if OpenAI parser provided domain keywords
+        if 'domain_keywords' in parsed_query and parsed_query['domain_keywords']:
+            domain_keywords = parsed_query['domain_keywords'][:3]  # Use OpenAI keywords
+        else:
+            # Extract meaningful domain terms from the query (fallback)
+            words = original_query.replace("'", "").split()
+            for word in words:
+                clean_word = word.strip('.,!?')
+                if clean_word in important_terms:
+                    domain_keywords.append(clean_word)
+        
+        # Add domain keywords to search query
+        if domain_keywords:
+            query_parts.extend(domain_keywords[:3])  # Limit to 3 most important terms
         
         search_query = " ".join(query_parts) if query_parts else "stars:>100"
         

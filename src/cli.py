@@ -50,15 +50,17 @@ class CLIInterface:
     Interactive command-line interface for the GitHub Analysis Agent
     """
     
-    def __init__(self, github_token: Optional[str] = None, debug: bool = False):
+    def __init__(self, github_token: Optional[str] = None, openai_api_key: Optional[str] = None, debug: bool = False, complete: bool = False):
         """
         Initialize the CLI interface
         
         Args:
             github_token: Optional GitHub token for API access
+            openai_api_key: Optional OpenAI API key for advanced query parsing
             debug: Enable debug logging
+            complete: Use OpenAI for response generation (--complete mode)
         """
-        self.agent = GitHubAnalysisAgent(github_token)
+        self.agent = GitHubAnalysisAgent(github_token, openai_api_key, use_openai_for_responses=complete)
         self.console = Console() if RICH_AVAILABLE else None
         self.debug = debug
         self.setup_logging()
@@ -415,6 +417,12 @@ Examples:
     )
     
     parser.add_argument(
+        '--openai-key', '-o',
+        help='OpenAI API key for advanced query parsing (or set OPENAI_API_KEY env var)',
+        default=os.getenv('OPENAI_API_KEY')
+    )
+    
+    parser.add_argument(
         '--debug', '-d',
         action='store_true',
         help='Enable debug logging'
@@ -431,10 +439,16 @@ Examples:
         help='Output results in JSON format (for single queries)'
     )
     
+    parser.add_argument(
+        '--complete', '-c',
+        action='store_true',
+        help='Use OpenAI for natural language responses (requires --openai-key)'
+    )
+    
     args = parser.parse_args()
     
     # Create CLI interface
-    cli = CLIInterface(github_token=args.token, debug=args.debug)
+    cli = CLIInterface(github_token=args.token, openai_api_key=args.openai_key, debug=args.debug, complete=args.complete)
     
     try:
         if args.query:

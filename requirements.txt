@@ -21,8 +21,9 @@ black>=23.9.0             # Code formatting
 flake8>=6.1.0             # Code linting
 mypy>=1.6.0               # Static type checking
 
-# Optional: Local LLM support
-# Uncomment these if you want to use local LLM capabilities
+# Optional: LLM support
+# Uncomment these if you want to use LLM capabilities
+openai>=1.54.0            # OpenAI API client (for advanced query parsing)
 # ollama-python>=0.1.7     # Python client for Ollama
 # transformers>=4.35.0     # Hugging Face transformers (for local models)
 # torch>=2.1.0             # PyTorch (for local model inference)

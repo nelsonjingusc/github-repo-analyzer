@@ -9,6 +9,13 @@ import re
 from typing import Dict, List, Optional, Any
 from enum import Enum
 import logging
+import json
+
+try:
+    from openai import OpenAI
+    OPENAI_AVAILABLE = True
+except ImportError:
+    OPENAI_AVAILABLE = False
 
 logger = logging.getLogger(__name__)
 
@@ -22,10 +29,148 @@ class QueryIntent(Enum):
     UNKNOWN = "unknown"
 
 
+class OpenAIQueryParser:
+    """
+    Advanced query parser using OpenAI GPT models for natural language understanding.
+    Provides more accurate parsing for complex queries.
+    """
+    
+    def __init__(self, api_key: str, model: str = "gpt-5"):
+        if not OPENAI_AVAILABLE:
+            raise ImportError("OpenAI library not installed. Run: pip install openai")
+        
+        self.client = OpenAI(api_key=api_key)
+        self.model = model
+        
+    def parse_query(self, query: str) -> Dict[str, Any]:
+        """Parse query using OpenAI GPT for advanced understanding"""
+        try:
+            prompt = self._create_parsing_prompt(query)
+            
+            # Try GPT-5 first, fallback to GPT-4o if not available
+            try:
+                response = self.client.chat.completions.create(
+                    model="gpt-5",
+                    messages=[{"role": "user", "content": prompt}],
+                    temperature=0.1,
+                    max_completion_tokens=300  # GPT-5 uses max_completion_tokens
+                )
+            except Exception as model_error:
+                logger.warning(f"GPT-5 not available for parsing: {model_error}. Using GPT-4o")
+                response = self.client.chat.completions.create(
+                    model="gpt-4o",
+                    messages=[{"role": "user", "content": prompt}],
+                    temperature=0.1,
+                    max_tokens=300  # GPT-4o still uses max_tokens
+                )
+            
+            result_text = response.choices[0].message.content.strip()
+            
+            # Parse JSON response - clean markdown code blocks if present
+            try:
+                # Remove markdown code block formatting
+                if result_text.strip().startswith('```'):
+                    lines = result_text.strip().split('\n')
+                    result_text = '\n'.join(lines[1:-1])  # Remove first and last lines
+                
+                result = json.loads(result_text)
+                
+                # Ensure all required fields are present with defaults
+                defaults = {
+                    'intent': QueryIntent.UNKNOWN,
+                    'language': None,
+                    'project_type': None,
+                    'sort_by': 'stars',
+                    'limit': 20,
+                    'repositories': [],
+                    'domain_keywords': [],
+                    'filters': {},
+                    'original_query': query,
+                    'confidence': 0.9
+                }
+                
+                # Fill in missing fields with defaults
+                for key, default_value in defaults.items():
+                    if key not in result:
+                        result[key] = default_value
+                
+                # Convert intent string to enum
+                if 'intent' in result and isinstance(result['intent'], str):
+                    try:
+                        result['intent'] = QueryIntent(result['intent'])
+                    except ValueError:
+                        result['intent'] = QueryIntent.UNKNOWN
+                
+                logger.info(f"OpenAI parsed query with intent: {result['intent']}")
+                return result
+                
+            except json.JSONDecodeError as e:
+                logger.error(f"Failed to parse OpenAI JSON response: {e}")
+                logger.error(f"Raw response: {result_text}")
+                # Fall back to rule-based parsing
+                return self._fallback_parse(query)
+                
+        except Exception as e:
+            logger.error(f"OpenAI parsing failed: {e}")
+            # Fall back to rule-based parsing
+            return self._fallback_parse(query)
+    
+    def _create_parsing_prompt(self, query: str) -> str:
+        """Create prompt for OpenAI query parsing"""
+        return f"""
+Parse this GitHub repository query into structured JSON format:
+
+Query: "{query}"
+
+Extract these fields and return ONLY valid JSON:
+
+{{
+    "intent": "ranking|comparison|trending|search",
+    "language": "programming language name or null",
+    "project_type": "library|framework|tool|application or null", 
+    "limit": number (if mentioned, max 50, default 20),
+    "repositories": ["repo1", "repo2"] (for comparisons only),
+    "domain_keywords": ["keyword1", "keyword2"] (important domain terms like "trading", "machine learning", etc.),
+    "sort_by": "stars|forks|updated"
+}}
+
+Intent rules:
+- "ranking": queries like "top 5", "best", "most popular"  
+- "comparison": queries with "vs", "compare", "difference between"
+- "trending": queries with "trending", "hot", "rising"
+- "search": general search queries like "find", "show me"
+
+Examples:
+"top 5 python web frameworks" → {{"intent": "ranking", "language": "python", "project_type": "framework", "limit": 5, "domain_keywords": ["web"]}}
+"compare React vs Vue" → {{"intent": "comparison", "repositories": ["React", "Vue"], "domain_keywords": []}}
+"find machine learning libraries" → {{"intent": "search", "domain_keywords": ["machine", "learning"], "project_type": "library"}}
+
+Return only JSON, no explanations:
+"""
+    
+    def _fallback_parse(self, query: str) -> Dict[str, Any]:
+        """Fallback to rule-based parsing if OpenAI fails"""
+        logger.info("Falling back to rule-based parsing")
+        parser = QueryParser()
+        return parser.parse_query(query)
+    
+    def validate_query(self, parsed_query: Dict[str, Any]) -> bool:
+        """Validate if the parsed query has sufficient information to process"""
+        # Delegate to rule-based parser for validation
+        parser = QueryParser()
+        return parser.validate_query(parsed_query)
+    
+    def get_suggested_clarifications(self, parsed_query: Dict[str, Any]) -> List[str]:
+        """Generate suggestions to clarify ambiguous queries"""
+        # Delegate to rule-based parser for suggestions
+        parser = QueryParser()
+        return parser.get_suggested_clarifications(parsed_query)
+
+
 class QueryParser:
     """
-    Parses natural language queries to extract structured parameters
-    for repository analysis.
+    Rule-based query parser for natural language understanding.
+    Fast and reliable fallback when OpenAI is not available.
     """
     
     def __init__(self):
@@ -209,7 +354,13 @@ class QueryParser:
             if project_type in query:
                 # Normalize to singular form
                 if project_type.endswith('s'):
-                    return project_type[:-1]
+                    # Handle special cases for irregular plurals
+                    if project_type == 'libraries':
+                        return 'library'
+                    elif project_type == 'frameworks':
+                        return 'framework'
+                    else:
+                        return project_type[:-1]
                 return project_type
         return None
     
