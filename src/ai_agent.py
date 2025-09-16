@@ -222,9 +222,10 @@ class LLMProvider:
             return "I couldn't find any trending repositories matching your criteria."
         
         language = context.get('language', '')
+        limit = min(len(data), context.get('limit', 10))
         response = f"## Trending {language.title() + ' ' if language else ''}Repositories\n\n"
         
-        for i, repo in enumerate(data[:10], 1):
+        for i, repo in enumerate(data[:limit], 1):
             name = repo.get('full_name', repo.get('name', 'Unknown'))
             stars = repo.get('stargazers_count', 0)
             language_info = repo.get('language', 'Multiple')
@@ -246,9 +247,10 @@ class LLMProvider:
             return "I couldn't find any repositories matching your search criteria."
         
         query = context.get('original_query', 'your query')
-        response = f"Found {len(data)} repositories related to '{query}':\n\n"
+        limit = min(len(data), context.get('limit', 8))
+        response = f"Found {limit} repositories related to '{query}':\n\n"
         
-        for i, repo in enumerate(data[:8], 1):
+        for i, repo in enumerate(data[:limit], 1):
             name = repo.get('full_name', repo.get('name', 'Unknown'))
             stars = repo.get('stargazers_count', 0)
             language_info = repo.get('language', 'Multiple')
