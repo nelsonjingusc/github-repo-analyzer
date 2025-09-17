@@ -156,7 +156,7 @@ class LLMProvider:
         """
         intent = context.get('intent')
         data = context.get('data', [])
-        language = context.get('language', 'repositories')
+        language = context.get('language') or 'all languages'
         
         if intent == QueryIntent.RANKING:
             return self._format_ranking_response(data, context)
@@ -172,7 +172,7 @@ class LLMProvider:
         if not data:
             return f"I couldn't find any {context.get('language', '')} repositories matching your criteria."
         
-        language = context.get('language', 'repositories')
+        language = context.get('language') or 'all languages'
         limit = min(len(data), context.get('limit', 5))
         
         response = f"Here are the top {limit} most starred {language} repositories:\n\n"
