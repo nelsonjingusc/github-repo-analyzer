@@ -5,10 +5,9 @@ GitHub Repository Analysis Agent - Main Entry Point
 A sophisticated AI agent that analyzes GitHub repository data to answer
 questions about code trends, project activity, and repository comparisons.
 
-This is the main entry point for the application. It can be run in
-interactive mode or with single queries.
+This is the main entry point for the application.
 
-Author: GitHub Repository Analyzer Team
+Author: Nelson Jing
 License: MIT
 """
 
@@ -45,10 +44,9 @@ Helps analyze GitHub repositories, find trending projects, and compare
 repositories through natural language queries.
 
 Examples:
-  python main.py
-  python main.py --token YOUR_GITHUB_TOKEN
   python main.py --query "top 5 Python web frameworks"
   python main.py --query "compare React vs Vue" --json
+  python main.py --token YOUR_GITHUB_TOKEN --query "trending Python projects"
 
 Environment Variables:
   GITHUB_TOKEN    - GitHub personal access token for higher rate limits
@@ -69,7 +67,8 @@ Environment Variables:
     
     parser.add_argument(
         '--query', '-q',
-        help='Execute a single query and exit'
+        required=True,
+        help='Repository analysis query (required)'
     )
     
     parser.add_argument(
@@ -95,11 +94,6 @@ Environment Variables:
         action='version',
         version='GitHub Repository Analyzer 1.0.0'
     )
-    
-    # Check for help or version first
-    if len(sys.argv) == 1:
-        print("🚀 Starting GitHub Repository Analysis Agent in interactive mode...")
-        print("Tip: Use --help to see all available options\n")
     
     # Parse arguments
     args = parser.parse_args()

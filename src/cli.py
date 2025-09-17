@@ -370,6 +370,10 @@ Welcome to the GitHub repository analysis assistant!
                     else:
                         print("\n\nGoodbye!")
                         break
+                except EOFError:
+                    # Handle EOF (Ctrl+D or non-interactive environment)
+                    print("\n\nGoodbye!")
+                    break
                 except Exception as e:
                     if RICH_AVAILABLE:
                         self.console.print(f"[red]Unexpected error: {e}[/red]")
@@ -430,7 +434,8 @@ Examples:
     
     parser.add_argument(
         '--query', '-q',
-        help='Run a single query and exit'
+        required=True,
+        help='Repository analysis query (required)'
     )
     
     parser.add_argument(
@@ -451,21 +456,17 @@ Examples:
     cli = CLIInterface(github_token=args.token, openai_api_key=args.openai_key, debug=args.debug, complete=args.complete)
     
     try:
-        if args.query:
-            # Single query mode
-            async def run_single_query():
-                result = await cli.agent.process_query(args.query)
-                if args.json:
-                    print(json.dumps(result, indent=2, default=str))
-                else:
-                    cli.display_result(result)
-                return result['success']
-            
-            success = asyncio.run(run_single_query())
-            sys.exit(0 if success else 1)
-        else:
-            # Interactive mode
-            asyncio.run(cli.run_interactive())
+        # Single query mode (now the only mode)
+        async def run_single_query():
+            result = await cli.agent.process_query(args.query)
+            if args.json:
+                print(json.dumps(result, indent=2, default=str))
+            else:
+                cli.display_result(result)
+            return result['success']
+        
+        success = asyncio.run(run_single_query())
+        sys.exit(0 if success else 1)
     
     except KeyboardInterrupt:
         print("\nInterrupted by user")
