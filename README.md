@@ -6,69 +6,63 @@ An intelligent AI agent that analyzes GitHub repository data to answer questions
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Code Style: Black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-## Features
-
-- **Natural Language Queries**: Ask questions in plain English about GitHub repositories
-- **Repository Rankings**: Find top repositories by stars, forks, or activity
-- **Trend Analysis**: Discover trending projects and emerging technologies
-- **Repository Comparisons**: Compare multiple repositories across various metrics
-- **Smart Search**: Find repositories by language, topic, or keywords
-- **Interactive CLI**: Beautiful command-line interface with rich formatting
-- **Free & Open Source**: Uses only free APIs and local processing
-
 ## Sample Interactions
 
+### User: "What are the top 5 most starred Python web frameworks?"
+**Agent**: Uses GitHub tool to search and analyze Python repos, returns ranked list
+
 ```bash
-Ask me about repositories: What are the top 5 most starred Python web frameworks?
+python3 main.py --query "What are the top 5 most starred Python web frameworks?"
 
 Analysis Result (Intent: ranking)
 ┌─────────────────────────────────────────────────────────────────┐
-│ Here are the top 5 most starred Python web frameworks:         │
+│ Here are the top 5 most starred python repositories:           │
 │                                                                 │
-│ 1. **django/django** 75,234 stars                               │
-│    A high-level Python web framework that encourages rapid...  │
-│                                                                 │
-│ 2. **pallets/flask** 65,847 stars                               │
-│    A lightweight WSGI web application framework for Python...  │
-│                                                                 │
-│ 3. **tornadoweb/tornado** 21,456 stars                          │
-│    Tornado is a Python web framework and asynchronous...       │
-│                                                                 │
-│ 4. **bottlepy/bottle** 8,234 stars                              │
-│    bottle.py is a fast and simple micro-framework for...       │
-│                                                                 │
-│ 5. **webpy/webpy** 5,876 stars                                  │
-│    web.py is a web framework for Python that is as...          │
+│  1 fastapi/fastapi 89,538 stars FastAPI framework, high        │
+│    performance, easy to learn, fast to code, ready for         │
+│    production                                                   │
+│  2 django/django 85,008 stars The Web framework for            │
+│    perfectionists with deadlines.                              │
+│  3 pallets/flask 70,369 stars The Python micro framework for   │
+│    building web applications.                                   │
+│  4 scrapy/scrapy 58,255 stars Scrapy, a fast high-level web    │
+│    crawling & scraping framework for Python.                   │
+│  5 Textualize/textual 31,019 stars The lean application        │
+│    framework for Python. Build sophisticated user interfaces   │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
+### User: "How active is the React repository compared to Vue?"
+**Agent**: Compares recent commit activity, issues, and community metrics
+
 ```bash
-Ask me about repositories: Compare React vs Vue.js activity
+python3 main.py --query "How active is the React repository compared to Vue?"
 
 Analysis Result (Intent: comparison)
 ┌─────────────────────────────────────────────────────────────────┐
-│ ## Repository Comparison                                        │
+│                     Repository Comparison                       │
 │                                                                 │
-│ ### facebook/react                                              │
-│ - Stars: 218,234                                                │
-│ - Forks: 44,876                                                 │
-│ - Language: JavaScript                                           │
-│ - Recent Commits: 156                                            │
-│ - Contributors: 1,234                                            │
-│ - Last Updated: 2024-01-15                                       │
+│                      facebook/react                             │
+│ • Stars: 238,944                                                │
+│ • Forks: 49,344                                                 │
+│ • Language: JavaScript                                          │
+│ • Recent Commits: 100                                           │
+│ • Contributors: 100                                             │
+│ • Last Updated: 2025-09-17                                      │
 │                                                                 │
-│ ### vuejs/vue                                                   │
-│ - Stars: 206,487                                                │
-│ - Forks: 33,645                                                 │
-│ - Language: JavaScript                                           │
-│ - Recent Commits: 89                                             │
-│ - Contributors: 876                                              │
-│ - Last Updated: 2024-01-14                                       │
+│                        vuejs/vue                                │
+│ • Stars: 209,422                                                │
+│ • Forks: 33,763                                                 │
+│ • Language: TypeScript                                          │
+│ • Recent Commits: 0                                             │
+│ • Contributors: 100                                             │
+│ • Last Updated: 2025-09-17                                      │
 │                                                                 │
-│ **Analysis**: React has more stars and recent activity,         │
-│ while Vue shows strong community engagement.                    │
+│ Analysis: React shows more recent activity with higher          │
+│ star count and active development.                              │
 └─────────────────────────────────────────────────────────────────┘
 ```
+
 
 ## Installation & Setup
 
@@ -118,33 +112,28 @@ repo-analyzer
 
 ## Usage
 
-### Interactive Mode
+### Basic Query
 ```bash
-python main.py
+python3 main.py --query "top 5 Python web frameworks"
 ```
 
-### Single Query Mode
+### With GitHub Token (Recommended)
 ```bash
-python main.py --query "top 10 Python machine learning libraries"
+# Set token as environment variable
+export GITHUB_TOKEN=your_github_token_here
+python3 main.py --query "trending Python projects"
+
+# Or provide token directly
+python3 main.py --token your_github_token_here --query "compare React vs Vue"
 ```
 
-### Enhanced AI Mode (with OpenAI)
+### With OpenAI Enhancement
 ```bash
 # Basic mode: fast template responses
-python main.py --openai-key YOUR_KEY --query "top 5 Python web frameworks"
+python3 main.py --openai-key YOUR_KEY --query "top 5 Python web frameworks"
 
 # Complete mode: natural language responses
-python main.py --openai-key YOUR_KEY --complete --query "compare Django vs Flask performance"
-```
-
-### JSON Output
-```bash
-python main.py --query "trending JavaScript projects" --json
-```
-
-### Debug Mode
-```bash
-python main.py --debug
+python3 main.py --openai-key YOUR_KEY --complete --query "compare Django vs Flask"
 ```
 
 ## Configuration
@@ -162,53 +151,20 @@ python main.py --debug
 ### Command Line Options
 
 ```bash
-usage: main.py [-h] [--token TOKEN] [--openai-key OPENAI_KEY] [--query QUERY] 
-               [--json] [--debug] [--complete] [--version]
+usage: main.py [-h] [--token TOKEN] [--openai-key OPENAI_KEY] --query QUERY [--complete]
 
-GitHub Repository Analysis Agent
-
-optional arguments:
+options:
   -h, --help            show this help message and exit
   --token TOKEN, -t TOKEN
                         GitHub personal access token (or set GITHUB_TOKEN env var)
   --openai-key OPENAI_KEY, -o OPENAI_KEY
                         OpenAI API key for advanced query parsing (or set OPENAI_API_KEY env var)
   --query QUERY, -q QUERY
-                        Execute a single query and exit
-  --json, -j            Output results in JSON format
-  --debug, -d           Enable debug logging and verbose output
+                        Repository analysis query (required)
   --complete, -c        Use OpenAI for natural language responses (requires --openai-key)
-  --version, -v         show program's version number and exit
 ```
 
-## 🎓 Query Examples
-
-### Repository Rankings
-- "What are the top 5 most starred Python frameworks?"
-- "Show me the 10 most forked JavaScript projects"
-- "Find two trending machine learning projects"
-- "Most active Go repositories this year"
-- "Best machine learning libraries in Python"
-
-### Trend Analysis
-- "What are trending JavaScript projects this week?"
-- "Show me three rising Python data science projects"
-- "Find popular React libraries from this month"
-- "Trending artificial intelligence repositories"
-
-### Repository Comparisons
-- "Compare React vs Vue.js vs Angular"
-- "How does TensorFlow compare to PyTorch?"
-- "Django vs Flask vs FastAPI comparison"
-- "Compare Kubernetes vs Docker Swarm activity"
-
-### Smart Search
-- "Find beginner-friendly machine learning projects"
-- "Show me Python web scraping libraries"
-- "Search for blockchain projects in Go"
-- "Find mobile app development frameworks"
-
-## 🏗 Architecture
+## Architecture
 
 ### Core Components
 
@@ -240,52 +196,12 @@ github-repo-analyzer/
 User Query → Query Parser → Intent Detection → GitHub API → Data Processing → Response Generation → CLI Display
 ```
 
-## AI Capabilities
-
-### Dual-Mode Architecture
-The system offers two response modes:
-
-**Default Mode (Fast)**:
-- Rule-based query parsing + OpenAI query understanding (when API key available)
-- Template-based structured responses  
-- ~1-3 seconds response time
-- Perfect for rapid exploration and MVP demonstrations
-
-**Complete Mode (`--complete` flag)**:
-- GPT-5/GPT-4o powered query parsing
-- Natural language response generation
-- ~10-15 seconds response time
-- Rich, conversational analysis with detailed insights
-
-### Natural Language Understanding
-The agent can understand various query patterns:
-- **Ranking queries**: "top N", "best", "most popular"
-- **Number parsing**: "two", "three", "five" automatically converted to limits
-- **Comparison queries**: "compare X vs Y", "difference between"
-- **Trending queries**: "trending", "hot", "rising"  
-- **Search queries**: "find", "show me", "projects about"
-
-### Response Generation
-- **OpenAI Integration**: GPT-5 with automatic fallback to GPT-4o (handles API compatibility)
-- **Intelligent Limit Processing**: Correctly applies parsed number limits to all response formats
-- **Local LLM Support**: Uses Ollama when available for offline operation
-- **Template System**: Smart structured responses as reliable fallback
-- **Rich Formatting**: Beautiful CLI output with tables, panels, and markdown
-
-### Network Resilience
-- **Smart Retry**: 3-attempt retry with progressive timeouts (10s → 20s → 30s)
-- **Rate Limit Handling**: Automatic retry with exponential backoff
-- **Graceful Degradation**: High-quality mock data when GitHub API unavailable
-- **International Support**: Works reliably in network-restricted environments
-- **API Caching**: 5-minute cache for GitHub API responses
-- **Async Processing**: Concurrent API requests for faster responses
-
 ## Security & Privacy
 
 - **No Data Collection**: All processing happens locally
 - **Token Security**: GitHub tokens are handled securely and never logged
 - **Rate Limit Compliance**: Respects GitHub API rate limits
-- **Error Handling**: Comprehensive error handling prevents crashes
+- **Error Handling**: Proper error handling prevents crashes
 
 ## Future Improvements
 
@@ -301,10 +217,6 @@ Key areas for enhancement:
 - Add conversation memory across sessions
 - Implement learning from user interactions
 
-### Data Coverage
-- Add support for GitLab and Bitbucket APIs
-- Integrate package registry data (PyPI, NPM)
-- Include code quality metrics from analysis tools
 
 ### User Interface
 - Build web dashboard with visualizations
@@ -346,18 +258,6 @@ flake8 src/
 # Type checking
 mypy src/
 ```
-
-## Recent Improvements
-
-### Query Limit Processing Fix
-- **Issue**: OpenAI correctly parsed "find two projects" as `limit: 2`, but template responses showed 10 results
-- **Solution**: Enhanced template formatting functions to respect parsed limits from AI query understanding
-- **Impact**: Natural language numbers ("two", "three") now correctly control result count across all response modes
-
-### GPT-5 Integration
-- **Feature**: Added GPT-5 support with automatic fallback to GPT-4o
-- **Compatibility**: Handles API parameter differences (`max_completion_tokens` vs `max_tokens`)
-- **Reliability**: Graceful degradation ensures consistent functionality
 
 ## License
 
