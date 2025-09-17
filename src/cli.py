@@ -74,7 +74,7 @@ class CLIInterface:
             # Main response
             response_panel = Panel(
                 Markdown(result['response']),
-                title=f"🤖 Analysis Result (Intent: {result['intent']})",
+                title=f"Analysis Result (Intent: {result['intent']})",
                 border_style="green"
             )
             self.console.print(response_panel)
@@ -96,7 +96,7 @@ class CLIInterface:
             # Error handling
             error_panel = Panel(
                 f"[red]{result['response']}[/red]",
-                title="❌ Error",
+                title="Error",
                 border_style="red"
             )
             self.console.print(error_panel)
@@ -105,7 +105,7 @@ class CLIInterface:
                 suggestions_text = "\n".join(f"• {suggestion}" for suggestion in result['suggestions'])
                 self.console.print(Panel(
                     suggestions_text,
-                    title="💡 Suggestions",
+                    title="Suggestions",
                     border_style="yellow"
                 ))
     

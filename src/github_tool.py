@@ -350,7 +350,7 @@ class GitHubRepositoryTool:
         This is for demo purposes only.
         """
         logger.info(f"Using mock data for language: {language}, query: {query}")
-        print("🚧 Note: Using demonstration data due to GitHub API connectivity issues.")
+        print("Note: Using demonstration data due to GitHub API connectivity issues.")
         
         if language and language.lower() == "python":
             return [

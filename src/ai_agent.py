@@ -183,7 +183,7 @@ class LLMProvider:
             stars = repo.get('stargazers_count', 0)
             description = (repo.get('description') or 'No description available')[:100]
             
-            response += f"{i}. **{full_name}** ⭐ {stars:,}\n"
+            response += f"{i}. **{full_name}** {stars:,} stars\n"
             full_description = repo.get('description') or ''
             response += f"   {description}{'...' if len(full_description) > 100 else ''}\n\n"
         
@@ -232,7 +232,7 @@ class LLMProvider:
             updated = repo.get('updated_at', '')[:10] if repo.get('updated_at') else 'Unknown'
             
             response += f"{i}. **{name}** ({language_info})\n"
-            response += f"   ⭐ {stars:,} stars | Updated: {updated}\n"
+            response += f"   {stars:,} stars | Updated: {updated}\n"
             
             if repo.get('description'):
                 desc = repo['description'][:80]
@@ -255,7 +255,7 @@ class LLMProvider:
             stars = repo.get('stargazers_count', 0)
             language_info = repo.get('language', 'Multiple')
             
-            response += f"{i}. **{name}** ({language_info}) - ⭐ {stars:,}\n"
+            response += f"{i}. **{name}** ({language_info}) - {stars:,} stars\n"
             
             if repo.get('description'):
                 desc = repo['description'][:100]

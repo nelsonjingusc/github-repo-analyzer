@@ -100,7 +100,7 @@ Environment Variables:
     
     # Validate GitHub token recommendation
     if not args.token:
-        print("⚠️  Warning: No GitHub token provided.")
+        print("Warning: No GitHub token provided.")
         print("   You can still use the agent, but with limited API rate limits.")
         print("   Get a token at: https://github.com/settings/tokens")
         print("   Set it with: export GITHUB_TOKEN=your_token_here\n")
@@ -116,12 +116,12 @@ Environment Variables:
             complete=args.complete
         )
     except KeyboardInterrupt:
-        print("\n👋 Goodbye!")
+        print("\nGoodbye!")
         sys.exit(0)
     except Exception as e:
         if args.debug:
             raise
-        print(f"❌ Error: {e}")
+        print(f"Error: {e}")
         sys.exit(1)
 
 
