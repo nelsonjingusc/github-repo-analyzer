@@ -186,12 +186,13 @@ optional arguments:
 ### Repository Rankings
 - "What are the top 5 most starred Python frameworks?"
 - "Show me the 10 most forked JavaScript projects"
+- "Find two trending machine learning projects"
 - "Most active Go repositories this year"
 - "Best machine learning libraries in Python"
 
 ### Trend Analysis
 - "What are trending JavaScript projects this week?"
-- "Show me rising Python data science projects"
+- "Show me three rising Python data science projects"
 - "Find popular React libraries from this month"
 - "Trending artificial intelligence repositories"
 
@@ -259,12 +260,14 @@ The system offers two response modes:
 ### Natural Language Understanding
 The agent can understand various query patterns:
 - **Ranking queries**: "top N", "best", "most popular"
+- **Number parsing**: "two", "three", "five" automatically converted to limits
 - **Comparison queries**: "compare X vs Y", "difference between"
 - **Trending queries**: "trending", "hot", "rising"  
 - **Search queries**: "find", "show me", "projects about"
 
 ### Response Generation
-- **OpenAI Integration**: GPT-5 with automatic fallback to GPT-4o
+- **OpenAI Integration**: GPT-5 with automatic fallback to GPT-4o (handles API compatibility)
+- **Intelligent Limit Processing**: Correctly applies parsed number limits to all response formats
 - **Local LLM Support**: Uses Ollama when available for offline operation
 - **Template System**: Smart structured responses as reliable fallback
 - **Rich Formatting**: Beautiful CLI output with tables, panels, and markdown
@@ -343,6 +346,18 @@ flake8 src/
 # Type checking
 mypy src/
 ```
+
+## Recent Improvements
+
+### Query Limit Processing Fix
+- **Issue**: OpenAI correctly parsed "find two projects" as `limit: 2`, but template responses showed 10 results
+- **Solution**: Enhanced template formatting functions to respect parsed limits from AI query understanding
+- **Impact**: Natural language numbers ("two", "three") now correctly control result count across all response modes
+
+### GPT-5 Integration
+- **Feature**: Added GPT-5 support with automatic fallback to GPT-4o
+- **Compatibility**: Handles API parameter differences (`max_completion_tokens` vs `max_tokens`)
+- **Reliability**: Graceful degradation ensures consistent functionality
 
 ## License
 
