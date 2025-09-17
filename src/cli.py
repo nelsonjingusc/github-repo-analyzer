@@ -6,9 +6,7 @@ allowing users to chat with the AI agent and get repository insights.
 """
 
 import asyncio
-import argparse
 import sys
-import os
 from typing import Optional
 import logging
 from datetime import datetime
@@ -131,65 +129,29 @@ class CLIInterface:
     
     
 
-def main():
-    """Main CLI entry point"""
-    parser = argparse.ArgumentParser(
-        description="GitHub Repository Analysis Agent - Intelligent CLI for repository insights",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
-Examples:
-  python -m src.cli --token YOUR_GITHUB_TOKEN
-  python -m src.cli --debug
-  python -m src.cli --query "top 5 Python web frameworks"
-        """
-    )
+def main(github_token=None, openai_api_key=None, query=None, json_output=False, debug=False, complete=False):
+    """
+    Main CLI entry point - now accepts parameters instead of parsing arguments
     
-    parser.add_argument(
-        '--token', '-t',
-        help='GitHub personal access token for higher API rate limits',
-        default=os.getenv('GITHUB_TOKEN')
-    )
-    
-    parser.add_argument(
-        '--openai-key', '-o',
-        help='OpenAI API key for advanced query parsing (or set OPENAI_API_KEY env var)',
-        default=os.getenv('OPENAI_API_KEY')
-    )
-    
-    parser.add_argument(
-        '--debug', '-d',
-        action='store_true',
-        help='Enable debug logging'
-    )
-    
-    parser.add_argument(
-        '--query', '-q',
-        required=True,
-        help='Repository analysis query (required)'
-    )
-    
-    parser.add_argument(
-        '--json', '-j',
-        action='store_true',
-        help='Output results in JSON format (for single queries)'
-    )
-    
-    parser.add_argument(
-        '--complete', '-c',
-        action='store_true',
-        help='Use OpenAI for natural language responses (requires --openai-key)'
-    )
-    
-    args = parser.parse_args()
+    Args:
+        github_token: GitHub personal access token
+        openai_api_key: OpenAI API key for advanced query parsing
+        query: Repository analysis query (required)
+        json_output: Output results in JSON format
+        debug: Enable debug logging
+        complete: Use OpenAI for natural language responses
+    """
+    if not query:
+        raise ValueError("Query parameter is required")
     
     # Create CLI interface
-    cli = CLIInterface(github_token=args.token, openai_api_key=args.openai_key, debug=args.debug, complete=args.complete)
+    cli = CLIInterface(github_token=github_token, openai_api_key=openai_api_key, debug=debug, complete=complete)
     
     try:
-        # Single query mode (now the only mode)
+        # Single query mode
         async def run_single_query():
-            result = await cli.agent.process_query(args.query)
-            if args.json:
+            result = await cli.agent.process_query(query)
+            if json_output:
                 print(json.dumps(result, indent=2, default=str))
             else:
                 cli.display_result(result)
@@ -203,7 +165,7 @@ Examples:
         sys.exit(1)
     except Exception as e:
         print(f"Critical error: {e}")
-        if args.debug:
+        if debug:
             raise
         sys.exit(1)
 

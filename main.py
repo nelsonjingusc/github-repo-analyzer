@@ -105,23 +105,16 @@ Environment Variables:
         print("   Get a token at: https://github.com/settings/tokens")
         print("   Set it with: export GITHUB_TOKEN=your_token_here\n")
     
-    # Pass arguments to CLI main
-    sys.argv = ['cli.py']  # Reset argv for cli module
-    if args.token:
-        sys.argv.extend(['--token', args.token])
-    if args.openai_key:
-        sys.argv.extend(['--openai-key', args.openai_key])
-    if args.query:
-        sys.argv.extend(['--query', args.query])
-    if args.json:
-        sys.argv.append('--json')
-    if args.debug:
-        sys.argv.append('--debug')
-    if args.complete:
-        sys.argv.append('--complete')
-    
+    # Call CLI main directly with parameters
     try:
-        cli_main()
+        cli_main(
+            github_token=args.token,
+            openai_api_key=args.openai_key,
+            query=args.query,
+            json_output=args.json,
+            debug=args.debug,
+            complete=args.complete
+        )
     except KeyboardInterrupt:
         print("\n👋 Goodbye!")
         sys.exit(0)
