@@ -2,7 +2,7 @@
 """
 GitHub Repository Analysis Agent - Main Entry Point
 
-A sophisticated AI agent that analyzes GitHub repository data to answer
+An AI agent that analyzes GitHub repository data to answer
 questions about code trends, project activity, and repository comparisons.
 
 This is the main entry point for the application.
