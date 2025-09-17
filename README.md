@@ -1,6 +1,6 @@
-# GitHub Repository Analysis Agent
+# GitHub Repository Analyzer
 
-An intelligent AI agent that analyzes GitHub repository data to answer questions about code trends, project activity, and repository comparisons using natural language queries.
+A command-line tool for analyzing GitHub repository data. Search for trending projects, compare repositories, and get insights about code trends through natural language queries.
 
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)

@@ -1,8 +1,7 @@
 """
-Command Line Interface for GitHub Repository Analysis Agent
+Command Line Interface for GitHub Repository Analysis
 
-This module provides a CLI for the GitHub repository analysis agent,
-allowing users to chat with the AI agent and get repository insights.
+CLI module for processing repository analysis queries and displaying results.
 """
 
 import asyncio

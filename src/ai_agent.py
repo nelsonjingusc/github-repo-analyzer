@@ -1,14 +1,8 @@
 """
-AI Agent for GitHub Repository Analysis
+GitHub Repository Analysis Core Module
 
-This module implements an intelligent agent that can understand natural language
-queries about GitHub repositories and provide detailed analysis using GitHub API data.
-
-The agent uses local LLM capabilities (Ollama) for conversation and integrates
-with custom GitHub analysis tools.
-
-Note: This was quite a fun project to build! Spent a lot of time fine-tuning
-the natural language understanding part.
+Processes natural language queries about GitHub repositories and returns
+structured analysis using GitHub API data and query parsing.
 """
 
 import json
