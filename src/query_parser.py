@@ -129,7 +129,7 @@ Extract these fields and return ONLY valid JSON:
     "language": "programming language name or null",
     "project_type": "library|framework|tool|application or null", 
     "limit": number (if mentioned, max 50, default 20),
-    "repositories": ["repo1", "repo2"] (for comparisons only),
+    "repositories": ["owner/repo1", "owner/repo2"] (for comparisons only),
     "domain_keywords": ["keyword1", "keyword2"] (important domain terms like "trading", "machine learning", etc.),
     "sort_by": "stars|forks|updated"
 }}
@@ -140,9 +140,21 @@ Intent rules:
 - "trending": queries with "trending", "hot", "rising"
 - "search": general search queries like "find", "show me"
 
+IMPORTANT: For comparison queries, convert repository names to full owner/repo format using the most popular/official repositories:
+- "React" → "facebook/react"
+- "Vue" → "vuejs/vue"
+- "Angular" → "angular/angular"
+- "Django" → "django/django"
+- "Flask" → "pallets/flask"
+- "TensorFlow" → "tensorflow/tensorflow"
+- "PyTorch" → "pytorch/pytorch"
+- "jQuery" → "jquery/jquery"
+- "Bootstrap" → "twbs/bootstrap"
+- "Express" → "expressjs/express"
+
 Examples:
 "top 5 python web frameworks" → {{"intent": "ranking", "language": "python", "project_type": "framework", "limit": 5, "domain_keywords": ["web"]}}
-"compare React vs Vue" → {{"intent": "comparison", "repositories": ["React", "Vue"], "domain_keywords": []}}
+"compare React vs Vue" → {{"intent": "comparison", "repositories": ["facebook/react", "vuejs/vue"], "domain_keywords": []}}
 "find machine learning libraries" → {{"intent": "search", "domain_keywords": ["machine", "learning"], "project_type": "library"}}
 
 Return only JSON, no explanations:

@@ -457,7 +457,21 @@ class GitHubAnalysisAgent:
             # Try to find the repository
             if '/' in repo_name:
                 owner, name = repo_name.split('/', 1)
-                repos_to_compare.append((owner, name))
+                # Verify the repository exists by trying to get its details
+                repo_details = self.github_tool.get_repository_details(owner, name)
+                if repo_details:
+                    repos_to_compare.append((owner, name))
+                else:
+                    # If OpenAI provided name doesn't exist, search for it
+                    logger.warning(f"Repository {repo_name} not found, searching for alternatives")
+                    search_results = self.github_tool.search_repositories(
+                        query=name,  # Search by the repo name part
+                        per_page=1
+                    )
+                    if search_results:
+                        full_name = search_results[0]['full_name']
+                        owner, name = full_name.split('/', 1)
+                        repos_to_compare.append((owner, name))
             else:
                 # Check if it's a language comparison (like "Java vs Python")
                 programming_languages = {'java', 'python', 'javascript', 'go', 'rust', 'c++', 'c#', 'php', 'ruby', 'swift', 'kotlin'}
