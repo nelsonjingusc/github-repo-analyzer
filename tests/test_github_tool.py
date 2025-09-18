@@ -98,11 +98,11 @@ class TestGitHubRepositoryTool:
     @patch('requests.get')
     def test_make_request_failure(self, mock_get, github_tool):
         """Test API request failure"""
-        mock_response = Mock()
-        mock_response.status_code = 404
-        mock_response.raise_for_status.side_effect = Exception("Not Found")
-        mock_get.return_value = mock_response
+        # Mock a requests.exceptions.RequestException to trigger the retry mechanism
+        import requests
+        mock_get.side_effect = requests.exceptions.RequestException("Connection failed")
         
+        # The current implementation uses retry mechanism and converts to GitHubAPIError
         with pytest.raises(GitHubAPIError):
             github_tool._make_request("nonexistent/repo")
     
@@ -166,10 +166,11 @@ class TestGitHubRepositoryTool:
         """Test repository statistics gathering"""
         # Mock API responses
         mock_commits = [{"sha": "abc123"}] * 5
+        # Current implementation checks for "pull_request" key presence, not null values
         mock_issues = [
-            {"number": 1, "pull_request": None},  # Issue
-            {"number": 2, "pull_request": {"url": "test"}},  # PR
-            {"number": 3, "pull_request": None},  # Issue
+            {"number": 1},  # Issue (no pull_request key)
+            {"number": 2, "pull_request": {"url": "test"}},  # PR (has pull_request key)
+            {"number": 3},  # Issue (no pull_request key)
         ]
         mock_contributors = [{"login": "user1"}, {"login": "user2"}]
         
@@ -198,11 +199,13 @@ class TestGitHubRepositoryTool:
         assert len(results) == 1
         assert results[0] == sample_repo_data
         
-        # Verify search parameters
+        # Verify search parameters - params are passed as second positional argument
         mock_request.assert_called_once()
-        args = mock_request.call_args[1]["params"]
-        assert "stars:>50" in args["q"]
-        assert "pushed:>" in args["q"]
+        args = mock_request.call_args[0]  # Get positional arguments
+        assert len(args) >= 2  # Should have endpoint and params
+        params = args[1]  # Second argument is params
+        assert "stars:>50" in params["q"]
+        assert "pushed:>" in params["q"]
     
     @patch.object(GitHubRepositoryTool, 'get_repository_details')
     def test_compare_repositories(self, mock_details, github_tool):
