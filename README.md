@@ -208,15 +208,15 @@ User Query → Query Parser → Intent Detection → GitHub API → Data Process
 Key areas for enhancement:
 
 ### Scalability & Performance
-- Add database persistence for caching across restarts
-- Implement distributed architecture with Redis
-- Add horizontal scaling support
+- Add Redis or PostgreSQL for persistent caching of GitHub responses and user sessions
+- Containerize the application with Docker; expose Prometheus metrics for observability
+- Use Pydantic or Pydantic v2 to validate incoming user inputs and standardize downstream schema
+- Integrate Grafana dashboards to monitor latency, error rate, and usage patterns
 
-### Enhanced AI Capabilities  
-- Integrate with advanced NLP libraries (spaCy/NLTK)
-- Add conversation memory across sessions
-- Implement learning from user interactions
-
+### Adaptive LLM/Agent Integration  
+- Implement an intelligent LLM router that selects between template-based responses, local models (e.g., Ollama), and OpenAI APIs based on query complexity
+- Support multi-turn conversations with session memory and prompt engineering with RAG
+- Add agents and multi-agent orchestration using LangChain or LangGraph for complex workflows
 
 ### User Interface
 - Build web dashboard with visualizations
